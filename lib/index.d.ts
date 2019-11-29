@@ -7,15 +7,12 @@ export declare class AnimLoopEngine {
     private animate;
     private frameReqId;
     private frameTasks;
-    private debugInterval;
-    private debugTS;
+    private lastFrameTaskId;
+    constructor();
     private loop;
-    private debugLoop;
-    addTasks(tasks: {
-        id: number | string;
-        fn: Function;
-    }[]): void;
-    deleteTask(taskId: number | string): void;
+    addTask(task: Function): void;
+    addTasks(tasks: Function[]): number[] | undefined;
+    deleteTask(taskId: number): void;
     start(debugInterval?: number): void;
     stop(): void;
 }

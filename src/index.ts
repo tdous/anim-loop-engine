@@ -7,51 +7,45 @@ export class AnimLoopEngine {
   private animate: boolean = false;
   private frameReqId: number = 0;
   private frameTasks: any[] = [];
+  private lastFrameTaskId: number = 0;
 
-  private debugInterval: number = 0;
-  private debugTS: number = 0;
+  constructor() {
+    this.addTasks = this.addTasks.bind(this);
+  }
 
   private loop = (ts: number = 0) => {
     const numTasks = this.frameTasks.length;
     for (let i = 0; i < numTasks; i++) {
-      this.frameTasks[i].fn();
+      this.frameTasks[i].fn(ts);
     }
 
     this.frameReqId = requestAnimationFrame(this.loop);
   };
 
-  // Debugging loop to avoid a conditional within the loop
-  private debugLoop = (ts: number = 0) => {
-    if (ts - this.debugTS > this.debugInterval) {
-      this.debugTS = ts;
-      const numTasks = this.frameTasks.length;
-      for (let i = 0; i < numTasks; i++) {
-        this.frameTasks[i].fn();
-      }
-    }
+  addTask(task: Function) {
+    this.addTasks([task]);
+  }
 
-    this.frameReqId = requestAnimationFrame(this.debugLoop);
-  };
-
-  addTasks(tasks: { id: number | string, fn: Function }[]) {
+  addTasks(tasks: Function[]) {
     if (tasks.length > 0) {
-      this.frameTasks = [...this.frameTasks, ...tasks];
+      const createdIds: number[] = [];
+      tasks.forEach(task => {
+        this.frameTasks.push({ id: this.lastFrameTaskId, fn: task });
+        createdIds.push(this.lastFrameTaskId);
+        this.lastFrameTaskId++;
+      });
+
+      return createdIds;
     }
   }
 
-  deleteTask(taskId: number | string) {
+  deleteTask(taskId: number) {
     this.frameTasks = this.frameTasks.filter(t => t.id !== taskId);
   }
 
   start(debugInterval?: number) {
     if (!this.animate) {
       this.animate = true;
-      if (debugInterval) {
-        this.debugInterval = debugInterval;
-        this.debugLoop();
-        return;
-      }
-
       this.loop();
     }
   }
