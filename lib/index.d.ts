@@ -10,8 +10,8 @@ export declare class AnimLoopEngine {
     private lastFrameTaskId;
     constructor();
     private loop;
-    addTask(task: Function): void;
-    addTasks(tasks: Function[]): number[] | undefined;
+    addTask(task: Function): number;
+    addTasks(tasks: Function[]): number[];
     deleteTask(taskId: number): void;
     start(debugInterval?: number): void;
     stop(): void;

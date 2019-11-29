@@ -23,20 +23,23 @@ export class AnimLoopEngine {
   };
 
   addTask(task: Function) {
-    this.addTasks([task]);
+    return this.addTasks([task])[0];
   }
 
   addTasks(tasks: Function[]) {
-    if (tasks.length > 0) {
-      const createdIds: number[] = [];
-      tasks.forEach(task => {
-        this.frameTasks.push({ id: this.lastFrameTaskId, fn: task });
-        createdIds.push(this.lastFrameTaskId);
-        this.lastFrameTaskId++;
-      });
+    const createdIds: number[] = [];
 
+    if (tasks.length == 0) {
       return createdIds;
     }
+
+    tasks.forEach(task => {
+      this.frameTasks.push({ id: this.lastFrameTaskId, fn: task });
+      createdIds.push(this.lastFrameTaskId);
+      this.lastFrameTaskId++;
+    });
+
+    return createdIds;
   }
 
   deleteTask(taskId: number) {
