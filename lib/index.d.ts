@@ -8,6 +8,9 @@ export declare class AnimLoopEngine {
     private frameReqId;
     private frameTasks;
     private lastFrameTaskId;
+    private tsDiff;
+    private tsLast;
+    private tsProg;
     constructor();
     private loop;
     addTask(task: Function): number;

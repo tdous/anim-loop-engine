@@ -9,17 +9,32 @@ export class AnimLoopEngine {
   private frameTasks: any[] = [];
   private lastFrameTaskId: number = 0;
 
+  private tsDiff: number = 0; // Diff between new and last timestamp
+  private tsLast: number = 0; // Previous timestamp
+  private tsProg: number = 0; // Only incremented while animating
+
   constructor() {
     this.addTasks = this.addTasks.bind(this);
   }
 
   private loop = (ts: number = 0) => {
-    const numTasks = this.frameTasks.length;
-    for (let i = 0; i < numTasks; i++) {
-      this.frameTasks[i].fn(ts);
+    if (!this.animate) {
+      return;
     }
 
-    this.frameReqId = requestAnimationFrame(this.loop);
+    if (this.tsLast !== ts) {
+      this.tsDiff = ts - this.tsLast;
+      this.tsProg += this.tsDiff;
+
+      const numTasks = this.frameTasks.length;
+      for (let i = 0; i < numTasks; i++) {
+        this.frameTasks[i].fn(this.tsProg, this.tsDiff, ts);
+      }
+    }
+
+    this.tsLast = ts;
+
+    this.frameReqId = window.requestAnimationFrame(this.loop);
   };
 
   addTask(task: Function) {
@@ -47,14 +62,12 @@ export class AnimLoopEngine {
   }
 
   start(debugInterval?: number) {
-    if (!this.animate) {
-      this.animate = true;
-      this.loop();
-    }
+    this.frameReqId = requestAnimationFrame(this.loop);
+    this.animate = true;
   }
 
   stop() {
-    cancelAnimationFrame(this.frameReqId);
+    window.cancelAnimationFrame(this.frameReqId);
     this.animate = false;
   }
 }
