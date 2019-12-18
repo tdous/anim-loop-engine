@@ -4,22 +4,30 @@
  * it assumes you're keeping your frame tasks fast.
  */
 export class AnimLoopEngine {
-  private animate: boolean = false;
-  private frameReqId: number = 0;
+  private frameReqId: number | null = 0;
   private frameTasks: any[] = [];
   private lastFrameTaskId: number = 0;
+
+  private tsPrev: number | null = 0; // Previous timestamp
 
   constructor() {
     this.addTasks = this.addTasks.bind(this);
   }
 
-  private loop = (ts: number = 0) => {
-    const numTasks = this.frameTasks.length;
-    for (let i = 0; i < numTasks; i++) {
-      this.frameTasks[i].fn(ts);
+  private tick = (ts: number = 0) => {
+    if (this.tsPrev === null) {
+      this.tsPrev = ts;
     }
 
-    this.frameReqId = requestAnimationFrame(this.loop);
+    let i = 0;
+    let dt = (ts - this.tsPrev) / 1000;
+    while (i < this.frameTasks.length) {
+      this.frameTasks[i].fn(ts, dt);
+      i++;
+    }
+    
+    this.tsPrev = ts;
+    this.frameReqId = window.requestAnimationFrame(this.tick);
   };
 
   addTask(task: Function) {
@@ -46,15 +54,13 @@ export class AnimLoopEngine {
     this.frameTasks = this.frameTasks.filter(t => t.id !== taskId);
   }
 
-  start(debugInterval?: number) {
-    if (!this.animate) {
-      this.animate = true;
-      this.loop();
-    }
+  start() {
+    this.tsPrev = null;
+    this.frameReqId = window.requestAnimationFrame(this.tick);
   }
 
   stop() {
-    cancelAnimationFrame(this.frameReqId);
-    this.animate = false;
+    window.cancelAnimationFrame(<number>this.frameReqId);
+    this.frameReqId = null;
   }
 }
