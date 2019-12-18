@@ -4,18 +4,15 @@
  * it assumes you're keeping your frame tasks fast.
  */
 export declare class AnimLoopEngine {
-    private animate;
     private frameReqId;
     private frameTasks;
     private lastFrameTaskId;
-    private tsDiff;
-    private tsLast;
-    private tsProg;
+    private tsPrev;
     constructor();
-    private loop;
+    private tick;
     addTask(task: Function): number;
     addTasks(tasks: Function[]): number[];
     deleteTask(taskId: number): void;
-    start(debugInterval?: number): void;
+    start(): void;
     stop(): void;
 }
